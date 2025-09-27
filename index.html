@@ -71,6 +71,12 @@
     return new URLSearchParams(window.location.search).get(name);
   }
 
+    window.addEventListener("onEmbeddedMessageSent", (event) => {
+        console.log("###Message Sent###");
+        document.activeElement.blur();
+    });
+
+
   // Register the listener BEFORE bootstrap loads, so we never miss the event
   window.addEventListener("onEmbeddedMessagingReady", () => {
     console.log("⚡ onEmbeddedMessagingReady fired");
