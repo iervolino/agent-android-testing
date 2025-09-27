@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Agentforce Test – GitHub Pages</title>
+  
+  <meta name="robots" content="noindex,nofollow" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' https: data: blob:;
+             script-src 'self' https: 'unsafe-inline' 'unsafe-eval';
+             connect-src 'self' https: wss:;
+             img-src 'self' https: data: blob:;
+             style-src 'self' 'unsafe-inline' https:;
+             frame-src https:;
+             font-src 'self' https: data:;">
+<style>
+  :root{
+    --brand-green-light: #bfeee1;  /* very light mint */
+    --brand-green:       #0AA373;  /* your brand green */
+    --brand-green-dark:  #0A855F;  /* deeper green */
+  }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+
+    /* Top → bottom linear gradient (light to dark) */
+    background: linear-gradient(
+      180deg,
+      var(--brand-green-light) 0%,
+      var(--brand-green) 45%,
+      var(--brand-green-dark) 100%
+    );
+  }
+
+  .card{
+    background:#fff;
+    border-radius:16px;
+    padding:24px;
+    max-width:760px; width:90%;
+    box-shadow:0 12px 28px rgba(0,0,0,.25);
+    color:#111;
+  }
+
+  /* Fix double scroll issue */
+  .embeddedMessagingLiveRegion {
+    height: 0 !important;
+  }
+</style>
+
+</head>
+<body>
+  <div class="card">
+    <h1>Agentforce (MIAW) – Test Page</h1>
+    <p class="muted">Hosted on GitHub Pages. Not indexed. Use for safe agent testing.</p>
+    <p>
+      <button onclick="openChat()">Open Chat</button>
+      <button onclick="location.reload()">Hard Refresh</button>
+    </p>
+    <pre id="log" class="muted"></pre>
+  </div>
+
+  <script>
+  // Helper: read query param
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  // Register the listener BEFORE bootstrap loads, so we never miss the event
+  window.addEventListener("onEmbeddedMessagingReady", () => {
+    console.log("⚡ onEmbeddedMessagingReady fired");
+
+    const QUERY_KEYS = {
+      plan: "pid"
+    };
+
+    const DEFAULT_PLAN_CODE = "p"; // Default plan if PID not passed
+
+    // Fetch the pid if sent in the CTA URL or use the Default
+    
+    const planCode = getParam(QUERY_KEYS.plan) || DEFAULT_PLAN_CODE;
+    
+    if (planCode) {
+      embeddedservice_bootstrap.prechatAPI.setHiddenPrechatFields({
+        // must match the Channel Variable Name you defined in Messaging Setup
+        "recommendedPlanCode": planCode
+      });
+      console.log("🔒 setHiddenPrechatFields: recommendedPlanCode =", planCode);
+
+      // optional: inspect what’s queued
+      console.log("👀 getPrechatFields() →", embeddedservice_bootstrap.prechatAPI.getPrechatFields?.());
+    } else {
+      console.log("ℹ️ No recommendedPlanCode in URL");
+    }
+  });
+
+  // Init called when bootstrap loads
+  function initEmbeddedMessaging() {
+    try {
+      console.log("→ initEmbeddedMessaging()");
+      embeddedservice_bootstrap.settings.language = "en_US";
+      embeddedservice_bootstrap.settings.enableUserInputForConversationWithBot = false;
+      embeddedservice_bootstrap.settings.disableStreamingResponses = true;
+
+      embeddedservice_bootstrap.init(
+        "00DOg000001Vluv",    // Org ID
+        "ONZ_Messaging_Web", // Deployment API name
+        "https://onz--dcaidev.sandbox.my.site.com/ESWONZMessagingWeb1757919743068",
+        { scrt2URL: "https://onz--dcaidev.sandbox.my.salesforce-scrt.com" }
+      );
+      console.log("✅ init() called");
+    } catch (err) {
+      console.error("❌ init error:", err);
+    }
+  }
+
+  // Button handler
+function openChat() {
+  if (embeddedservice_bootstrap?.utilAPI?.launchChat) {
+    embeddedservice_bootstrap.utilAPI.launchChat()
+      .then(() => console.log("🟢 launchChat() invoked"))
+      .catch(err => console.error("❌ launchChat() error:", err));
+  } else {
+    console.log("⏳ utilAPI not ready yet");
+  }
+}
+</script>
+
+<script type='text/javascript' src='https://onz--dcaidev.sandbox.my.site.com/ESWONZMessagingWeb1757919743068/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
+
+</body>
+</html>
